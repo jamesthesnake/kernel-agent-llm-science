@@ -1,7 +1,6 @@
-# kernel-agent-llm-science/kernel_agent/schemas.py
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Literal, TypedDict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 DType = Literal["fp32", "bf16", "fp16"]
 
@@ -45,7 +44,9 @@ class ConfigResult(TypedDict, total=False):
     throughput_gbps: Optional[float]
     achieved_occupancy: Optional[float]
     l_inf_error: float
-    ulp_error: Optional[float]            
+    ulp_error: Optional[float]
+    baseline_latency_ms: Optional[float]
+    speedup_vs_baseline: Optional[float]
     passed: bool
     notes: Optional[str]
 
@@ -60,5 +61,4 @@ class Results(BaseModel):
     tested: List[ConfigResult]
     best: Optional[ConfigResult]
     executor_info: Dict[str, Any]
-    recheck: Optional[Dict[str, Any]] = None   
-
+    recheck: Optional[Dict[str, Any]] = None
