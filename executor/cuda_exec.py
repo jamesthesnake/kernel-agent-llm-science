@@ -1,15 +1,53 @@
 from __future__ import annotations
 from typing import List, Optional
+import math
 import torch
 from torch.utils.cpp_extension import load_inline
-from .common import time_ms, stencil3x3_reference, elem_size_bytes, dtype_to_torch, max_ulp_error, apply_vram_quota_gb
+from .common import (
+    time_ms, stencil3x3_reference, elem_size_bytes, dtype_to_torch,
+    max_ulp_error, apply_vram_quota_gb, time_eager_stencil_ms
+)
 from kernel_agent.schemas import CudaPlan, Results, ConfigResult
 
-# ... WRAPPER_TEMPLATE unchanged ...
+WRAPPER_TEMPLATE = r"""
+#include <torch/extension.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
+extern "C" __global__ void stencil3x3_kernel(const {SCALAR}* __restrict__ inp,
+                                             {SCALAR}* __restrict__ out,
+                                             int H, int W);
+
+static void launch_kernel(torch::Tensor inp, torch::Tensor out, int bx, int by) {
+  TORCH_CHECK(inp.is_cuda() && out.is_cuda(), "tensors must be CUDA");
+  auto H = (int)inp.size(0);
+  auto W = (int)inp.size(1);
+  dim3 block(bx, by, 1);
+  dim3 grid((W + bx - 1) / bx, (H + by - 1) / by, 1);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream();
+  stencil3x3_kernel<<<grid, block, 0, stream>>>(
+      ({SCALAR}*)inp.data_ptr<{SCALAR}>(),
+      ({SCALAR}*)out.data_ptr<{SCALAR}>(),
+      H, W);
+}
+
+PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
+  m.def("launch", &launch_kernel, "launch");
+}
+"""
 
 def _compile_module(kernel_src: str, scalar: str, name: str):
-    # unchanged
-    # ...
+    full_src = kernel_src + "\n" + WRAPPER_TEMPLATE.replace("{SCALAR}", scalar)
+    extra_cuda_cflags = ["-O3", "-std=c++17", "-U__CUDA_NO_HALF_OPERATORS__", "-gencode=arch=compute_90,code=sm_90"]
+    mod = load_inline(
+        name=name,
+        cpp_sources="",
+        cuda_sources=full_src,
+        functions=["launch"],
+        with_cuda=True,
+        extra_cuda_cflags=extra_cuda_cflags,
+        verbose=False,
+    )
+    return mod
 
 @torch.inference_mode()
 def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
@@ -30,6 +68,10 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
         ref = stencil3x3_reference(inp.to(torch.float32)).to(torch_dtype)
         out = torch.empty_like(inp)
         bytes_moved = (9 + 1) * H * W * elem_size_bytes(plan.dtype)
+
+        # Eager baseline once per shape
+        baseline_ms = time_eager_stencil_ms(inp, iters=plan.iters, warmup=max(5, plan.iters // 5), timeout_s=timeout_s)
+
         for bx in plan.param_grid.get("BLOCK_X", [16]):
             for by in plan.param_grid.get("BLOCK_Y", [16]):
                 def _call():
@@ -41,6 +83,7 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                     tol = plan.tolerance["stencil3x3"][plan.dtype]
                     passed = linf <= tol
                     tput = bytes_moved / (lat * 1e-3) / 1e9
+                    speedup = float(baseline_ms / lat) if (baseline_ms and math.isfinite(lat)) else None
                     tested.append({
                         "config": {"BLOCK_X": bx, "BLOCK_Y": by},
                         "shape": {"H": H, "W": W},
@@ -49,6 +92,8 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                         "achieved_occupancy": None,
                         "l_inf_error": float(linf),
                         "ulp_error": float(ulp),
+                        "baseline_latency_ms": float(baseline_ms),
+                        "speedup_vs_baseline": speedup,
                         "passed": bool(passed),
                     })
                 except TimeoutError as e:
@@ -60,6 +105,8 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                         "achieved_occupancy": None,
                         "l_inf_error": float("inf"),
                         "ulp_error": None,
+                        "baseline_latency_ms": float(baseline_ms),
+                        "speedup_vs_baseline": None,
                         "passed": False,
                         "notes": f"timeout: {e}",
                     })
@@ -72,6 +119,8 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                         "achieved_occupancy": None,
                         "l_inf_error": float("inf"),
                         "ulp_error": None,
+                        "baseline_latency_ms": float(baseline_ms),
+                        "speedup_vs_baseline": None,
                         "passed": False,
                         "notes": f"exception: {type(e).__name__}: {e}",
                     })
@@ -80,7 +129,6 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
     passing = [r for r in tested if r.get("passed")]
     best = min(passing, key=lambda r: r["latency_ms"]) if passing else None
 
-    # Optional second-GPU recheck
     recheck = None
     if best and verify_device is not None and verify_device != device and verify_device < torch.cuda.device_count():
         torch.cuda.synchronize(device)
