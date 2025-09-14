@@ -45,6 +45,7 @@ class ConfigResult(TypedDict, total=False):
     throughput_gbps: Optional[float]
     achieved_occupancy: Optional[float]
     l_inf_error: float
+    ulp_error: Optional[float]            
     passed: bool
     notes: Optional[str]
 
@@ -59,3 +60,5 @@ class Results(BaseModel):
     tested: List[ConfigResult]
     best: Optional[ConfigResult]
     executor_info: Dict[str, Any]
+    recheck: Optional[Dict[str, Any]] = None   
+
