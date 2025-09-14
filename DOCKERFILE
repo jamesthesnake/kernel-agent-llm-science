@@ -1,0 +1,22 @@
+# kernel-agent-llm-science/Dockerfile
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-venv python3-pip build-essential git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create venv
+RUN python3 -m venv /opt/venv
+ENV PATH=/opt/venv/bin:$PATH
+RUN pip install --upgrade pip
+
+# Install PyTorch 2.4 + Triton 3.0 wheels for CUDA 12.x
+# If you have a local wheelhouse, copy it in and pip install from there.
+RUN pip install torch==2.4.0 triton==3.0.0 --extra-index-url https://download.pytorch.org/whl/cu124
+COPY pyproject.toml ./
+RUN pip install -e .
+
+# Default workdir
+WORKDIR /workspace
+CMD ["/bin/bash"]
