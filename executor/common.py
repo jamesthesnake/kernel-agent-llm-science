@@ -25,25 +25,20 @@ def elem_size_bytes(dtype: str) -> int:
 
 @torch.inference_mode()
 def time_ms(fn, iters: int = 50, warmup: int = 10, max_seconds: Optional[float] = None) -> float:
-    """CUDA-event timing with a soft wall-time budget. If the loop would exceed
-    max_seconds, early-abort and raise TimeoutError."""
     start_evt = torch.cuda.Event(enable_timing=True)
     end_evt = torch.cuda.Event(enable_timing=True)
-
     for _ in range(warmup):
         fn()
     torch.cuda.synchronize()
-
     start_evt.record()
     t0 = time.perf_counter()
     done = 0
-    for i in range(iters):
+    for _ in range(iters):
         fn()
         done += 1
         if max_seconds is not None and (time.perf_counter() - t0) > max_seconds:
             end_evt.record()
             torch.cuda.synchronize()
-            # Use what we have to avoid poisoning the run with inf
             ms = start_evt.elapsed_time(end_evt) / max(1, done)
             raise TimeoutError(f"timed out after {max_seconds}s (partial mean {ms:.4f} ms over {done} iters)")
     end_evt.record()
@@ -52,24 +47,13 @@ def time_ms(fn, iters: int = 50, warmup: int = 10, max_seconds: Optional[float] 
 
 @torch.inference_mode()
 def max_ulp_error(out: torch.Tensor, ref: torch.Tensor, dtype: torch.dtype) -> float:
-    """
-    Compute max ULP error w.r.t. the *target dtype*’s representable grid.
-    We quantize both to `dtype`, compute nextafter spacing in that dtype,
-    then measure |out-ref| / ulp_spacing.
-    """
     dev = out.device
     out_d = out.to(dtype)
     ref_d = ref.to(dtype)
-
-    # one-step toward +inf in the target dtype
     pos_inf = torch.tensor(float("inf"), dtype=dtype, device=dev)
     step = (torch.nextafter(ref_d, pos_inf) - ref_d).to(torch.float32).abs()
-
-    # Guard: zero step can only happen at inf/NaN; not expected in softmax, but be safe.
-    finfo = torch.finfo(dtype)
-    tiny = torch.tensor(finfo.tiny, dtype=torch.float32, device=dev)
+    tiny = torch.tensor(torch.finfo(dtype).tiny, dtype=torch.float32, device=dev)
     step = torch.where(step == 0, tiny, step)
-
     ulp = (out_d.to(torch.float32) - ref_d.to(torch.float32)).abs() / step
     return float(torch.nan_to_num(ulp, nan=float("inf"), posinf=float("inf"), neginf=float("inf")).max().item())
 
@@ -96,8 +80,22 @@ def stencil3x3_reference(inp: torch.Tensor) -> torch.Tensor:
     return out
 
 def apply_vram_quota_gb(vram_gb: Optional[float], device: int):
-    if vram_gb is None: 
+    if vram_gb is None:
         return
     total = torch.cuda.get_device_properties(device).total_memory / (1024**3)
     frac = max(0.05, min(0.95, vram_gb / total))
     torch.cuda.set_per_process_memory_fraction(frac, device=device)
+
+@torch.inference_mode()
+def time_eager_softmax_ms(x: torch.Tensor, iters=50, warmup=10, timeout_s=None) -> float:
+    def _ref():
+        torch.nn.functional.softmax(x, dim=1, dtype=None)
+    return time_ms(_ref, iters=iters, warmup=warmup, max_seconds=timeout_s)
+
+@torch.inference_mode()
+def time_eager_stencil_ms(inp: torch.Tensor, iters=50, warmup=10, timeout_s=None) -> float:
+    x = inp.unsqueeze(0).unsqueeze(0)
+    def _ref():
+        y = torch.nn.functional.pad(x, (1,1,1,1), mode="replicate")
+        torch.nn.functional.avg_pool2d(y, kernel_size=3, stride=1)
+    return time_ms(_ref, iters=iters, warmup=warmup, max_seconds=timeout_s)
