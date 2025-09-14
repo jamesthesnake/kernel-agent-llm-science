@@ -1,9 +1,13 @@
 from __future__ import annotations
-from typing import Dict, Any, List, Optional
+from typing import List, Optional
+import math
 import torch
 import triton
 import triton.language as tl
-from .common import time_ms, softmax_reference, elem_size_bytes, dtype_to_torch, max_ulp_error, apply_vram_quota_gb
+from .common import (
+    time_ms, softmax_reference, elem_size_bytes, dtype_to_torch,
+    max_ulp_error, apply_vram_quota_gb, time_eager_softmax_ms
+)
 from kernel_agent.schemas import TritonPlan, Results, ConfigResult
 
 def _load_kernel_from_string(src: str):
@@ -15,7 +19,6 @@ def _load_kernel_from_string(src: str):
     return candidates[0]
 
 def _bytes_softmax_three_pass(B: int, N: int, dtype: str) -> int:
-    # 3 passes (read + read + read/write) ~ 3 * N elements per row
     return 3 * B * N * elem_size_bytes(dtype)
 
 @torch.inference_mode()
@@ -33,6 +36,9 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
         x = torch.randn((B, N), device=f"cuda:{device}", dtype=torch_dtype)
         y = torch.empty_like(x)
         ref = softmax_reference(x, torch_dtype)
+
+        # Eager baseline once per shape
+        baseline_ms = time_eager_softmax_ms(x, iters=50, warmup=10, timeout_s=timeout_s)
 
         for BLOCK in plan.param_grid.get("BLOCK", [128]):
             for num_warps in plan.param_grid.get("num_warps", [4]):
@@ -55,6 +61,7 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                         tol = plan.tolerance["row_softmax"][plan.dtype]
                         passed = (linf <= tol)
                         tput = _bytes_softmax_three_pass(B, N, plan.dtype) / (lat * 1e-3) / 1e9
+                        speedup = float(baseline_ms / lat) if (baseline_ms and math.isfinite(lat)) else None
                         tested.append({
                             "config": {"BLOCK": BLOCK, "num_warps": num_warps, "num_stages": num_stages},
                             "shape": {"B": B, "N": N},
@@ -63,6 +70,8 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                             "achieved_occupancy": None,
                             "l_inf_error": float(linf),
                             "ulp_error": float(ulp),
+                            "baseline_latency_ms": float(baseline_ms),
+                            "speedup_vs_baseline": speedup,
                             "passed": bool(passed),
                         })
                     except TimeoutError as e:
@@ -74,6 +83,8 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                             "achieved_occupancy": None,
                             "l_inf_error": float("inf"),
                             "ulp_error": None,
+                            "baseline_latency_ms": float(baseline_ms),
+                            "speedup_vs_baseline": None,
                             "passed": False,
                             "notes": f"timeout: {e}",
                         })
@@ -86,6 +97,8 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                             "achieved_occupancy": None,
                             "l_inf_error": float("inf"),
                             "ulp_error": None,
+                            "baseline_latency_ms": float(baseline_ms),
+                            "speedup_vs_baseline": None,
                             "passed": False,
                             "notes": f"exception: {type(e).__name__}: {e}",
                         })
@@ -94,7 +107,6 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
     passing = [r for r in tested if r.get("passed")]
     best = min(passing, key=lambda r: r["latency_ms"]) if passing else None
 
-    # Optional second-GPU re-verification on the best config
     recheck = None
     if best and verify_device is not None and verify_device != device and verify_device < torch.cuda.device_count():
         torch.cuda.synchronize(device)
@@ -122,8 +134,6 @@ def run(plan: TritonPlan, *, device: int = 0, timeout_s: Optional[float] = None,
             }
         except Exception as e:
             recheck = {"device": int(verify_device), "notes": f"recheck_failed: {e}", "passed": False}
-
-        # restore primary device
         torch.cuda.set_device(device)
 
     return Results(
