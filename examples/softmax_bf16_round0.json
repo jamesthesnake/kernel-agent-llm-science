@@ -1,0 +1,12 @@
+{
+  "experiment_id": "softmax_bf16_round0",
+  "backend": "triton",
+  "op": "row_softmax",
+  "dtype": "bf16",
+  "shapes": [ { "B": 32, "N": 8192 } ],
+  "hypothesis": "Larger BLOCK up to 256 with 4 warps minimizes latency until register pressure causes stalls; 1-2 stages similar.",
+  "metrics": ["latency_ms","throughput_gbps","achieved_occupancy","l_inf_error"],
+  "tolerance": { "row_softmax": { "bf16": 1e-2, "fp32": 1e-5, "fp16": 5e-3 } },
+  "param_grid": { "BLOCK": [64,128,256], "num_warps":[2,4,8], "num_stages":[1,2] },
+  "triton_kernel": "from triton import jit\nimport triton\nimport triton.language as tl\n\n@triton.jit\ndef row_softmax_kernel(X, Y, B: tl.constexpr, N: tl.constexpr, BLOCK: tl.constexpr):\n    pid = tl.program_id(axis=0)\n    offs = tl.arange(0, BLOCK)\n    row_start = pid * N\n    ptrs = X + row_start + offs\n    mask = offs < N\n    x = tl.load(ptrs, mask=mask, other=-float('inf'))\n    # reduce max\n    maxval = tl.max(x, axis=0)\n    x = x - maxval\n    num = tl.exp(x.to(tl.float32))\n    denom = tl.sum(num, axis=0)\n    y = (num / denom).to(tl.bfloat16)\n    tl.store(Y + row_start + offs, y, mask=mask)\n"
+}
