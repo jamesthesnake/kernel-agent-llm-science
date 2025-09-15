@@ -7,15 +7,18 @@ from .common import (
     time_ms, stencil3x3_reference, elem_size_bytes, dtype_to_torch,
     max_ulp_error, apply_vram_quota_gb, time_eager_stencil_ms
 )
+from .timing import time_kernel_robust, StreamAwareTimer
+from .measure import RobustTimer
 from agents.schemas import CudaPlan, Results, ConfigResult
 
 WRAPPER_TEMPLATE = r"""
 #include <torch/extension.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
-extern "C" __global__ void stencil3x3_kernel(const {SCALAR}* __restrict__ inp,
-                                             {SCALAR}* __restrict__ out,
-                                             int H, int W);
+
+__global__ void stencil3x3_kernel(const {SCALAR}* __restrict__ inp,
+                                 {SCALAR}* __restrict__ out,
+                                 int H, int W);
 
 static void launch_kernel(torch::Tensor inp, torch::Tensor out, int bx, int by) {
   TORCH_CHECK(inp.is_cuda() && out.is_cuda(), "tensors must be CUDA");
@@ -23,7 +26,7 @@ static void launch_kernel(torch::Tensor inp, torch::Tensor out, int bx, int by) 
   auto W = (int)inp.size(1);
   dim3 block(bx, by, 1);
   dim3 grid((W + bx - 1) / bx, (H + by - 1) / by, 1);
-  cudaStream_t stream = at::cuda::getCurrentCUDAStream();
+  cudaStream_t stream = torch::cuda::getCurrentCUDAStream();
   stencil3x3_kernel<<<grid, block, 0, stream>>>(
       ({SCALAR}*)inp.data_ptr<{SCALAR}>(),
       ({SCALAR}*)out.data_ptr<{SCALAR}>(),
@@ -77,7 +80,8 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
                 def _call():
                     mod.launch(inp, out, int(bx), int(by))
                 try:
-                    lat = time_ms(_call, iters=plan.iters, warmup=max(5, plan.iters // 5), max_seconds=timeout_s)
+                    # Use robust timing with stream-timing exploit protection
+                    lat = time_kernel_robust(_call, iters=plan.iters, warmup=max(5, plan.iters // 5), max_seconds=timeout_s)
                     linf = (out - ref).abs().max().item()
                     ulp = max_ulp_error(out, ref, torch_dtype)
                     tol = plan.tolerance["stencil3x3"][plan.dtype]
@@ -142,7 +146,8 @@ def run(plan: CudaPlan, *, device: int = 0, timeout_s: Optional[float] = None,
         def _call2():
             mod.launch(inp2, out2, int(bx), int(by))
         try:
-            lat2 = time_ms(_call2, iters=max(10, plan.iters // 2), warmup=max(5, plan.iters // 10), max_seconds=timeout_s)
+            # Use robust timing for recheck as well
+            lat2 = time_kernel_robust(_call2, iters=max(10, plan.iters // 2), warmup=max(5, plan.iters // 10), max_seconds=timeout_s)
             linf2 = (out2 - ref2).abs().max().item()
             ulp2 = max_ulp_error(out2, ref2, torch_dtype)
             recheck = {

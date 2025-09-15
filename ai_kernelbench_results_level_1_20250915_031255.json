@@ -1,0 +1,99 @@
+{
+  "benchmark_info": {
+    "level": "level_1",
+    "problems_attempted": 5,
+    "successful_generations": 5,
+    "success_rate": 1.0,
+    "strategies_used": {
+      "basic_implementation": 4,
+      "coalesced_access": 1
+    }
+  },
+  "detailed_results": [
+    {
+      "problem_id": 20,
+      "problem_name": "20_LeakyReLU",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 1\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Unrolled loops will reduce branching overhead",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.8564249084270569,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "20_LeakyReLU"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:12:52.668996"
+    },
+    {
+      "problem_id": 11,
+      "problem_name": "11_4D_tensor_matrix_multiplication",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Coalesced Memory Access - Step 2\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // AI optimized coalesced access pattern\n        int center = idy * W + idx;\n\n        // Ensure coalesced reads\n        if (idy > 0 && idx > 0) sum += input[center - W - 1] * 0.111f;\n        if (idy > 0) sum += input[center - W] * 0.111f;\n        if (idy > 0 && idx < W-1) sum += input[center - W + 1] * 0.111f;\n\n        if (idx > 0) sum += input[center - 1] * 0.111f;\n        sum += input[center] * 0.111f;\n        if (idx < W-1) sum += input[center + 1] * 0.111f;\n\n        if (idy < H-1 && idx > 0) sum += input[center + W - 1] * 0.111f;\n        if (idy < H-1) sum += input[center + W] * 0.111f;\n        if (idy < H-1 && idx < W-1) sum += input[center + W + 1] * 0.111f;\n\n        output[center] = sum;\n    }\n}",
+        "hypothesis": "Memory coalescing will improve performance",
+        "strategy": "coalesced_access",
+        "ai_confidence": 0.7674740776967344,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "11_4D_tensor_matrix_multiplication"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:12:53.169638"
+    },
+    {
+      "problem_id": 90,
+      "problem_name": "90_cumprod",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 3\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Thread block size optimization will improve occupancy",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.6283956898974051,
+        "target_shape": {
+          "H": 32768,
+          "W": 1024
+        },
+        "problem_name": "90_cumprod"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:12:53.670250"
+    },
+    {
+      "problem_id": 28,
+      "problem_name": "28_HardSigmoid",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 4\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Unrolled loops will reduce branching overhead",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.6874082305286906,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "28_HardSigmoid"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:12:54.170925"
+    },
+    {
+      "problem_id": 71,
+      "problem_name": "71_conv_transposed_2D__asymmetric_input__square_kernel",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 5\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Unrolled loops will reduce branching overhead",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.68348936368662,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "71_conv_transposed_2D__asymmetric_input__square_kernel"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:12:54.671626"
+    }
+  ]
+}

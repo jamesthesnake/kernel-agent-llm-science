@@ -1,0 +1,269 @@
+{
+  "benchmark_info": {
+    "level": "level_1",
+    "problems_attempted": 15,
+    "successful_generations": 15,
+    "success_rate": 1.0,
+    "strategies_used": {
+      "coalesced_access": 3,
+      "basic_implementation": 12
+    }
+  },
+  "detailed_results": [
+    {
+      "problem_id": 1,
+      "problem_name": "1_Square_matrix_multiplication_",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Coalesced Memory Access - Step 1\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // AI optimized coalesced access pattern\n        int center = idy * W + idx;\n\n        // Ensure coalesced reads\n        if (idy > 0 && idx > 0) sum += input[center - W - 1] * 0.111f;\n        if (idy > 0) sum += input[center - W] * 0.111f;\n        if (idy > 0 && idx < W-1) sum += input[center - W + 1] * 0.111f;\n\n        if (idx > 0) sum += input[center - 1] * 0.111f;\n        sum += input[center] * 0.111f;\n        if (idx < W-1) sum += input[center + 1] * 0.111f;\n\n        if (idy < H-1 && idx > 0) sum += input[center + W - 1] * 0.111f;\n        if (idy < H-1) sum += input[center + W] * 0.111f;\n        if (idy < H-1 && idx < W-1) sum += input[center + W + 1] * 0.111f;\n\n        output[center] = sum;\n    }\n}",
+        "hypothesis": "Memory coalescing will improve performance",
+        "strategy": "coalesced_access",
+        "ai_confidence": 0.6150634076235812,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "1_Square_matrix_multiplication_"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:32.054483"
+    },
+    {
+      "problem_id": 77,
+      "problem_name": "77_conv_transposed_3D_square_input_square_kernel___padded____dilated____strided__",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 2\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Unrolled loops will reduce branching overhead",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.8001329564081489,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "77_conv_transposed_3D_square_input_square_kernel___padded____dilated____strided__"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:32.554923"
+    },
+    {
+      "problem_id": 90,
+      "problem_name": "90_cumprod",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Coalesced Memory Access - Step 3\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // AI optimized coalesced access pattern\n        int center = idy * W + idx;\n\n        // Ensure coalesced reads\n        if (idy > 0 && idx > 0) sum += input[center - W - 1] * 0.111f;\n        if (idy > 0) sum += input[center - W] * 0.111f;\n        if (idy > 0 && idx < W-1) sum += input[center - W + 1] * 0.111f;\n\n        if (idx > 0) sum += input[center - 1] * 0.111f;\n        sum += input[center] * 0.111f;\n        if (idx < W-1) sum += input[center + 1] * 0.111f;\n\n        if (idy < H-1 && idx > 0) sum += input[center + W - 1] * 0.111f;\n        if (idy < H-1) sum += input[center + W] * 0.111f;\n        if (idy < H-1 && idx < W-1) sum += input[center + W + 1] * 0.111f;\n\n        output[center] = sum;\n    }\n}",
+        "hypothesis": "Memory coalescing will improve performance",
+        "strategy": "coalesced_access",
+        "ai_confidence": 0.8330347102983333,
+        "target_shape": {
+          "H": 32768,
+          "W": 1024
+        },
+        "problem_name": "90_cumprod"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:33.055393"
+    },
+    {
+      "problem_id": 52,
+      "problem_name": "52_Argmin_over_a_dimension",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Coalesced Memory Access - Step 4\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // AI optimized coalesced access pattern\n        int center = idy * W + idx;\n\n        // Ensure coalesced reads\n        if (idy > 0 && idx > 0) sum += input[center - W - 1] * 0.111f;\n        if (idy > 0) sum += input[center - W] * 0.111f;\n        if (idy > 0 && idx < W-1) sum += input[center - W + 1] * 0.111f;\n\n        if (idx > 0) sum += input[center - 1] * 0.111f;\n        sum += input[center] * 0.111f;\n        if (idx < W-1) sum += input[center + 1] * 0.111f;\n\n        if (idy < H-1 && idx > 0) sum += input[center + W - 1] * 0.111f;\n        if (idy < H-1) sum += input[center + W] * 0.111f;\n        if (idy < H-1 && idx < W-1) sum += input[center + W + 1] * 0.111f;\n\n        output[center] = sum;\n    }\n}",
+        "hypothesis": "Memory coalescing will improve performance",
+        "strategy": "coalesced_access",
+        "ai_confidence": 0.8404903426847338,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "52_Argmin_over_a_dimension"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:33.555870"
+    },
+    {
+      "problem_id": 68,
+      "problem_name": "68_conv_transposed_3D__square_input__asymmetric_kernel",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 5\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Vectorized loads will increase throughput",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.7895596963210001,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "68_conv_transposed_3D__square_input__asymmetric_kernel"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:34.056368"
+    },
+    {
+      "problem_id": 29,
+      "problem_name": "29_Softplus",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 6\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Shared memory tiling will reduce global memory traffic",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.8794326429358443,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "29_Softplus"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:34.556817"
+    },
+    {
+      "problem_id": 99,
+      "problem_name": "99_TripletMarginLoss",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 7\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Shared memory tiling will reduce global memory traffic",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.7317726801662205,
+        "target_shape": {
+          "H": 8192,
+          "W": 1024
+        },
+        "problem_name": "99_TripletMarginLoss"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:35.057303"
+    },
+    {
+      "problem_id": 54,
+      "problem_name": "54_conv_standard_3D__square_input__square_kernel",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 8\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Unrolled loops will reduce branching overhead",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.7145381875616799,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "54_conv_standard_3D__square_input__square_kernel"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:35.557736"
+    },
+    {
+      "problem_id": 19,
+      "problem_name": "19_ReLU",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 9\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Thread block size optimization will improve occupancy",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.7488437044509433,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "19_ReLU"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:36.058166"
+    },
+    {
+      "problem_id": 67,
+      "problem_name": "67_conv_standard_1D",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 10\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Vectorized loads will increase throughput",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.6612138548288269,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "67_conv_standard_1D"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:36.558617"
+    },
+    {
+      "problem_id": 23,
+      "problem_name": "23_Softmax",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 11\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Vectorized loads will increase throughput",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.8790179516068166,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "23_Softmax"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:37.059021"
+    },
+    {
+      "problem_id": 66,
+      "problem_name": "66_conv_standard_3D__asymmetric_input__asymmetric_kernel",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 12\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Shared memory tiling will reduce global memory traffic",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.6716943945307936,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "66_conv_standard_3D__asymmetric_input__asymmetric_kernel"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:37.559500"
+    },
+    {
+      "problem_id": 6,
+      "problem_name": "6_Matmul_with_large_K_dimension_",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 13\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Thread block size optimization will improve occupancy",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.7147515457428222,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "6_Matmul_with_large_K_dimension_"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:38.059908"
+    },
+    {
+      "problem_id": 61,
+      "problem_name": "61_conv_transposed_3D__square_input__square_kernel",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 14\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Unrolled loops will reduce branching overhead",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.8593822218722178,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "61_conv_transposed_3D__square_input__square_kernel"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:38.560406"
+    },
+    {
+      "problem_id": 18,
+      "problem_name": "18_Matmul_with_transposed_both",
+      "ai_solution": {
+        "ai_kernel_code": "\n// AI Generated Basic Kernel - Step 15\n__global__ void ai_stencil_kernel(float* input, float* output, int H, int W) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int idy = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (idx < W && idy < H) {\n        float sum = 0.0f;\n\n        // Basic 3x3 stencil - AI generated\n        for (int di = -1; di <= 1; di++) {\n            for (int dj = -1; dj <= 1; dj++) {\n                int ni = max(0, min(H-1, idy + di));\n                int nj = max(0, min(W-1, idx + dj));\n                sum += input[ni * W + nj] * 0.111f;\n            }\n        }\n\n        output[idy * W + idx] = sum;\n    }\n}",
+        "hypothesis": "Vectorized loads will increase throughput",
+        "strategy": "basic_implementation",
+        "ai_confidence": 0.8911192326458598,
+        "target_shape": {
+          "H": 1024,
+          "W": 1024
+        },
+        "problem_name": "18_Matmul_with_transposed_both"
+      },
+      "success": true,
+      "timestamp": "2025-09-15T03:13:39.060817"
+    }
+  ]
+}

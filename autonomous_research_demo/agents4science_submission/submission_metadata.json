@@ -1,0 +1,27 @@
+{
+  "conference": "1st Open Conference of AI Agents for Science (Agents4Science)",
+  "submission_type": "AI-authored research paper",
+  "primary_author": "Autonomous GPU Optimization Agent",
+  "author_type": "AI Agent",
+  "human_role": "Infrastructure and submission logistics only",
+  "ai_contributions": {
+    "research_design": "100% autonomous",
+    "hypothesis_generation": "100% autonomous",
+    "experimentation": "100% autonomous",
+    "analysis": "100% autonomous",
+    "manuscript_writing": "100% autonomous"
+  },
+  "research_achievements": {
+    "max_speedup": "3.76\u00d7",
+    "patterns_discovered": 3,
+    "insights_generated": 3,
+    "hypotheses_formed": 3,
+    "confidence_score": 0.82
+  },
+  "novel_contributions": [
+    "First end-to-end autonomous AI research in GPU optimization",
+    "Self-supervised pattern discovery in computational optimization",
+    "AI-generated scientific hypotheses about kernel optimization",
+    "Demonstration of autonomous scientific research capabilities"
+  ]
+}

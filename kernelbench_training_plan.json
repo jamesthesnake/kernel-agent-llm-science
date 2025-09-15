@@ -1,0 +1,56 @@
+{
+  "phase_1": {
+    "name": "Data Collection & Preparation",
+    "tasks": [
+      "Collect KernelBench examples",
+      "Generate synthetic training data",
+      "Create problem-solution pairs",
+      "Validate data quality"
+    ],
+    "estimated_time": "2-4 hours",
+    "status": "in_progress"
+  },
+  "phase_2": {
+    "name": "Model Setup & Infrastructure",
+    "tasks": [
+      "Set up base model (CodeLlama-7B)",
+      "Configure training environment",
+      "Implement data loading pipeline",
+      "Set up evaluation metrics"
+    ],
+    "estimated_time": "1-2 hours",
+    "status": "pending"
+  },
+  "phase_3": {
+    "name": "Training & Fine-tuning",
+    "tasks": [
+      "Initial training run (few epochs)",
+      "Hyperparameter tuning",
+      "Full training with validation",
+      "Model checkpointing"
+    ],
+    "estimated_time": "4-8 hours (GPU dependent)",
+    "status": "pending"
+  },
+  "phase_4": {
+    "name": "Evaluation & Testing",
+    "tasks": [
+      "Test on KernelBench validation set",
+      "Measure compilation success rate",
+      "Measure correctness rate",
+      "Calculate fast_p metrics"
+    ],
+    "estimated_time": "1-2 hours",
+    "status": "pending"
+  },
+  "phase_5": {
+    "name": "Deployment & Integration",
+    "tasks": [
+      "Integrate trained model into evaluation pipeline",
+      "Run final KernelBench benchmark",
+      "Generate Agents4Science submission"
+    ],
+    "estimated_time": "1 hour",
+    "status": "pending"
+  }
+}

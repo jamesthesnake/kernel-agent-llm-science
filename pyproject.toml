@@ -4,19 +4,78 @@ requires = ["setuptools>=68", "wheel"]
 [project]
 name = "kernel-agent-llm-science"
 version = "0.2.0"
-description = "Executor + GRPO training for KernelLLM-Agent"
+description = "Autonomous AI Agent for GPU Kernel Optimization and Scientific Research"
 requires-python = ">=3.10"
 dependencies = [
-  "torch==2.4.0",
-  "triton==3.0.0",
-  "numpy>=1.26",
-  "pydantic>=2.7",
-  "rich>=13.7",
-  "matplotlib>=3.8",
-  "transformers>=4.44",
-  "accelerate>=0.33",
-  "datasets>=2.20"
+  # Core ML/AI frameworks
+  "torch>=2.0.0",
+  "triton>=3.0.0",
+  "transformers>=4.40.0",
+  "accelerate>=0.30.0",
+  "datasets>=2.20.0",
+  "tokenizers>=0.19.0",
+
+  # Scientific computing
+  "numpy>=1.24.0",
+  "scipy>=1.10.0",
+  "matplotlib>=3.7.0",
+
+  # Data handling and validation
+  "pydantic>=2.5.0",
+  "pandas>=2.0.0",
+
+  # Utilities
+  "rich>=13.0.0",
+  "tqdm>=4.65.0",
+  "pathlib",
+
+  # Optional GPU acceleration
+  "bitsandbytes>=0.41.0",
+  "flash-attn>=2.5.0; platform_machine=='x86_64'",
+
+  # Development and testing
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "black>=23.0.0",
+  "isort>=5.12.0",
+  "flake8>=6.0.0",
+
+  # Documentation
+  "sphinx>=7.0.0",
+  "sphinx-rtd-theme>=1.3.0",
+
+  # Jupyter for notebooks
+  "jupyter>=1.0.0",
+  "ipykernel>=6.25.0"
 ]
+
+[project.optional-dependencies]
+# Full LLaMA model support
+llama = [
+  "sentencepiece>=0.1.99",
+  "protobuf>=4.21.0",
+  "huggingface-hub>=0.17.0"
+]
+
+# Advanced optimization
+optimization = [
+  "optuna>=3.3.0",
+  "wandb>=0.15.0",
+  "tensorboard>=2.14.0"
+]
+
+# Full research capabilities
+research = [
+  "kernel-agent-llm-science[llama,optimization]",
+  "arxiv>=1.4.0",
+  "requests>=2.31.0",
+  "beautifulsoup4>=4.12.0"
+]
+
+[project.scripts]
+autonomous-research = "scripts.autonomous_research:main"
+train-grpo = "scripts.grpo_train:main"
+analyze-results = "scripts.autonomous_research:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

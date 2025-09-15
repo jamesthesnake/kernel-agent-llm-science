@@ -63,3 +63,44 @@ class Results(BaseModel):
     best: Optional[ConfigResult]
     executor_info: Dict[str, Any]
     recheck: Optional[Dict[str, Any]] = None
+
+# Analysis Agent Schemas
+class Pattern(BaseModel):
+    pattern_type: str
+    description: str
+    frequency: int
+    avg_speedup: float
+    examples: List[str]
+    confidence: float
+
+class Insight(BaseModel):
+    title: str
+    description: str
+    significance: str
+    evidence: str
+    confidence: float
+
+class Hypothesis(BaseModel):
+    statement: str
+    rationale: str
+    testable_predictions: List[str]
+    experimental_design: str
+    confidence: float
+
+class PerformanceMetrics(BaseModel):
+    mean_speedup: float
+    max_speedup: float
+    success_rate: float
+    convergence_steps: int
+    optimization_patterns: List[str]
+
+class AnalysisResult(BaseModel):
+    performance_metrics: PerformanceMetrics
+    discovered_patterns: List[Pattern]
+    generated_insights: List[Insight]
+    novel_hypotheses: List[Hypothesis]
+    analysis_timestamp: str
+    confidence_score: float
+
+    def to_dict(self) -> Dict[str, Any]:
+        return self.model_dump()
