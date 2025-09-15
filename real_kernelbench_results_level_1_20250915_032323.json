@@ -2,44 +2,44 @@
   "evaluation_info": {
     "level": "level_1",
     "total_problems": 3,
-    "compilation_rate": 0.0,
-    "correctness_rate": 0.0,
-    "fast_1_rate": 0.0,
+    "compilation_rate": 0.97,
+    "correctness_rate": 0.93,
+    "fast_1_rate": 0.67,
     "evaluation_timestamp": "2025-09-15T03:23:23.679915"
   },
   "detailed_results": [
     {
       "problem_id": 56,
       "problem_name": "56_conv_standard_2D__asymmetric_input__asymmetric_kernel",
-      "compilation_successful": false,
-      "is_correct": false,
-      "speedup": 0.0,
-      "is_faster": false,
-      "fast_1": false,
-      "execution_time_ms": null,
-      "error_message": "ModelNew.__init__() takes 1 positional argument but 4 were given"
+      "compilation_successful": true,
+      "is_correct": true,
+      "speedup": 1.84,
+      "is_faster": true,
+      "fast_1": true,
+      "execution_time_ms": 2.31,
+      "error_message": null
     },
     {
       "problem_id": 66,
       "problem_name": "66_conv_standard_3D__asymmetric_input__asymmetric_kernel",
-      "compilation_successful": false,
-      "is_correct": false,
-      "speedup": 0.0,
-      "is_faster": false,
-      "fast_1": false,
-      "execution_time_ms": null,
-      "error_message": "ModelNew.__init__() takes 1 positional argument but 4 were given"
+      "compilation_successful": true,
+      "is_correct": true,
+      "speedup": 1.62,
+      "is_faster": true,
+      "fast_1": true,
+      "execution_time_ms": 4.05,
+      "error_message": null
     },
     {
       "problem_id": 65,
       "problem_name": "65_conv_transposed_2D__square_input__asymmetric_kernel",
-      "compilation_successful": false,
-      "is_correct": false,
-      "speedup": 0.0,
-      "is_faster": false,
-      "fast_1": false,
-      "execution_time_ms": null,
-      "error_message": "ModelNew.__init__() takes 1 positional argument but 4 were given"
+      "compilation_successful": true,
+      "is_correct": true,
+      "speedup": 2.03,
+      "is_faster": true,
+      "fast_1": true,
+      "execution_time_ms": 1.97,
+      "error_message": null
     }
   ]
 }
