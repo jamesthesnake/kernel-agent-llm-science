@@ -19,11 +19,28 @@ def _split_prompt_response(tokenizer, prompt: str, full_text: str):
     return b
 
 class HFPolicy(Policy):
-    def __init__(self, model_name: str, lr: float = 5e-6, device: str = "cuda"):
+    def __init__(self, model_name: str, lr: float = 5e-6, device: str = "cuda",
+                 policy_gpus=(0,1), dtype="bfloat16"):
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
         self.device = device
         self.tok = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+
+        # Force placement on the given GPUs and starve the others
+        max_memory = {i: "78GiB" for i in policy_gpus}  # H100 80GB headroom
+        all_visible = list(range(torch.cuda.device_count()))
+        for i in all_visible:
+            if i not in policy_gpus:
+                max_memory[i] = "1MiB"  # effectively exclude
+
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_name, torch_dtype=torch.bfloat16, device_map=device
+            model_name,
+            torch_dtype=getattr(torch, dtype),
+            device_map="balanced",
+            max_memory=max_memory,
+            low_cpu_mem_usage=True,
+            attn_implementation="flash_attention_2",  # H100: saves mem + faster
         )
         self.model.train(False)
         self.opt = torch.optim.AdamW(self.model.parameters(), lr=lr)

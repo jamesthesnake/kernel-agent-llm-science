@@ -8,7 +8,7 @@ from .common import (
     time_ms, softmax_reference, elem_size_bytes, dtype_to_torch,
     max_ulp_error, apply_vram_quota_gb, time_eager_softmax_ms
 )
-from kernel_agent.schemas import TritonPlan, Results, ConfigResult
+from agents.schemas import TritonPlan, Results, ConfigResult
 
 def _load_kernel_from_string(src: str):
     ns = {}

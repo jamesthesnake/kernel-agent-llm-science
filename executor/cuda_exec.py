@@ -7,7 +7,7 @@ from .common import (
     time_ms, stencil3x3_reference, elem_size_bytes, dtype_to_torch,
     max_ulp_error, apply_vram_quota_gb, time_eager_stencil_ms
 )
-from kernel_agent.schemas import CudaPlan, Results, ConfigResult
+from agents.schemas import CudaPlan, Results, ConfigResult
 
 WRAPPER_TEMPLATE = r"""
 #include <torch/extension.h>

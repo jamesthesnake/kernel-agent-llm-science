@@ -3,12 +3,13 @@ import json, math, random, os
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 import torch
-from kernel_agent.grpo.markers import THINK_START, THINK_END, ANS_START, ANS_END
-from kernel_agent.grpo.reward import compute_reward, parse_plan_json_from_answer
-from kernel_agent.grpo.rewrite import rewrite_spec
-from kernel_agent.providers.base import Policy, FrozenRef
-from kernel_agent.schemas import TritonPlan, CudaPlan
-from kernel_agent.executor import triton_exec, cuda_exec
+from grpo.markers import THINK_START, THINK_END, ANS_START, ANS_END
+from grpo.reward import compute_reward, parse_plan_json_from_answer
+from grpo.rewrite import rewrite_spec
+from providers.base import Policy, FrozenRef
+from agents.schemas import TritonPlan, CudaPlan
+from executor.trtion_exec import run as triton_exec_run
+from executor.cuda_exec import run as cuda_exec_run
 
 @dataclass
 class Task:
@@ -36,10 +37,10 @@ def run_single_plan(plan: dict, device: int, verify_device: int | None, timeout_
     try:
         backend = plan.get("backend")
         if backend == "triton":
-            res = triton_exec.run(TritonPlan.model_validate(plan),
+            res = triton_exec_run(TritonPlan.model_validate(plan),
                                   device=device, timeout_s=timeout_s, vram_gb=vram_gb, verify_device=verify_device)
         elif backend == "cuda":
-            res = cuda_exec.run(CudaPlan.model_validate(plan),
+            res = cuda_exec_run(CudaPlan.model_validate(plan),
                                 device=device, timeout_s=timeout_s, vram_gb=vram_gb, verify_device=verify_device)
         else:
             return None

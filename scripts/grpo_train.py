@@ -1,7 +1,7 @@
 from __future__ import annotations
 import argparse
-from kernel_agent.grpo.grpo_loop import train_grpo, Task
-from kernel_agent.providers.transformers_local import HFPolicy, HFFrozenRef
+from grpo.grpo_loop import train_grpo, Task
+from providers.transformers_local import HFPolicy, HFFrozenRef
 
 def main():
     ap = argparse.ArgumentParser()
@@ -22,7 +22,7 @@ def main():
         Task(backend="cuda",   op="stencil3x3", dtype="fp32", shape={"H": 2048, "W": 2048}),
     ]
 
-    policy = HFPolicy(args.model, lr=5e-6, device=f"cuda:{args.device}")
+    policy = HFPolicy(args.model, lr=5e-6, device="cuda", policy_gpus=(0,1))
     ref    = HFFrozenRef(args.ref, device=f"cuda:{args.device}")
     train_grpo(
         policy, ref, tasks,

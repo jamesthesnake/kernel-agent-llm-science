@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Literal, TypedDict
+from typing import Any, Dict, List, Optional, Literal
+from typing_extensions import TypedDict
 from pydantic import BaseModel
 
 DType = Literal["fp32", "bf16", "fp16"]

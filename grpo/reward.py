@@ -2,7 +2,7 @@ from __future__ import annotations
 import json, math
 from dataclasses import dataclass
 from typing import Any, Dict
-from kernel_agent.grpo.markers import format_reward, MarkerParse
+from grpo.markers import format_reward, MarkerParse
 
 @dataclass
 class RewardTerms:
